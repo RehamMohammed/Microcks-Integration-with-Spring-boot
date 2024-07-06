@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * OrderService is responsible for checking business rules/constraints on Orders.
@@ -31,11 +30,8 @@ public class OrderService {
 
    private final PastryAPIClient pastryRepository;
 
-   //private final OrderEventPublisher eventPublisher;
-
    OrderService(PastryAPIClient pastryRepository) {
       this.pastryRepository = pastryRepository;
-      //this.eventPublisher = eventPublisher;
    }
 
    /**
@@ -66,7 +62,6 @@ public class OrderService {
       // Persist and publish creation event.
       OrderEvent orderCreated = new OrderEvent(System.currentTimeMillis(), result, "Creation");
       persistOrderEvent(orderCreated);
-      //eventPublisher.publishOrderCreated(orderCreated);
 
       return result;
    }
@@ -80,7 +75,7 @@ public class OrderService {
 
    private CompletableFuture<Boolean> checkPastryAvailability(String pastryName) {
       try {
-         Pastry pastry = pastryRepository.getPastry(pastryName);
+         Pastry pastry = pastryRepository.getPastryByName(pastryName);
          return CompletableFuture.completedFuture("available".equals(pastry.status()));
       } catch (Exception e) {
          log.error("Got exception from Pastry client: {}", e.getMessage());

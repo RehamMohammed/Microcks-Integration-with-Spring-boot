@@ -2,33 +2,37 @@ package org.acme.order.client;
 
 import org.acme.order.client.model.Pastry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-/**
- * PastryAPIClient is responsible for requesting the product/stock management system (aka the Pastry registry)
- * using its REST API. It should take care of serializing entities and Http params as required by the 3rd party API.
- * @author laurent
- */
-@Component
+@Service
 public class PastryAPIClient {
-   @Autowired
-   @Qualifier("pastryRestClient")
-   RestClient restClient;
+    private final RestTemplate restTemplate;
 
-   public Pastry getPastry(String name) {
-      return restClient.get().uri("/pastries/{name}", name)
-            .retrieve()
-            .body(Pastry.class);
-   }
+    @Autowired
+    public PastryAPIClient(RestTemplateBuilder restTemplateBuilder) {
+        this.restTemplate = restTemplateBuilder
+                .rootUri("http://localhost:8585/rest/API+Pastry+-+2.0/2.0.0")
+                .build();
+    }
 
-   public List<Pastry> listPastries(String size) {
-      return restClient.get().uri("/pastries?size=" + size)
-            .retrieve()
-            .body(new ParameterizedTypeReference<List<Pastry>>() {});
-   }
+    public List<Pastry> listPastries() {
+        ResponseEntity<List<Pastry>> response = restTemplate.exchange(
+                "/pastry",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Pastry>>() {}
+        );
+        return response.getBody();
+    }
+
+    public Pastry getPastryByName(String name) {
+        return restTemplate.getForObject("/pastry/{name}", Pastry.class, name);
+    }
 }

@@ -45,8 +45,8 @@ public class OrderController {
       return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
    }
 
-   @GetMapping("/{id}")
-   public Order getOrder(@PathVariable String id) throws OrderNotFoundException {
-      return service.getOrder(id);
-   }
+//   @GetMapping("/{id}")
+//   public Order getOrder(@PathVariable String id) throws OrderNotFoundException {
+//      return service.getOrder(id);
+//   }
 }
