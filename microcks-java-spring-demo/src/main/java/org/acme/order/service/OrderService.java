@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * OrderService is responsible for checking business rules/constraints on Orders.
@@ -34,15 +35,6 @@ public class OrderService {
       this.pastryRepository = pastryRepository;
    }
 
-   /**
-    * This method will check that an Order can be actually placed and persisted. A full implementation
-    * will probably check stocks, customer loyalty, payment methods, shipping details, etc... For sake
-    * of simplicity, we'll just check that products (here pastries) are all available.
-    * @param info The order information.
-    * @return A created Order with incoming info, new unique identifier and created status.
-    * @throws UnavailablePastryException
-    * @throws Exception
-    */
    public Order placeOrder(OrderInfo info) throws UnavailablePastryException, Exception {
       // For all products in order, check the availability calling the Pastry API.
       Map<CompletableFuture<Boolean>, String> availabilityFutures = new HashMap<>();
@@ -53,6 +45,17 @@ public class OrderService {
       // Wait for all completable future to finish.
       CompletableFuture.allOf(availabilityFutures.keySet().toArray(new CompletableFuture[0])).join();
 
+//      try {
+//         // If one pastry is marked as unavailable, throw a business exception.
+//         for (CompletableFuture<Boolean> availabilityFuture : availabilityFutures.keySet()) {
+//            if (!availabilityFuture.get()) {
+//               String pastryName = availabilityFutures.get(availabilityFuture);
+//               throw new UnavailablePastryException(pastryName, "Pastry " + pastryName + " is not available");
+//            }
+//         }
+//      } catch (InterruptedException | ExecutionException e) {
+//         throw new Exception("Unexpected exception: " + e.getMessage());
+//      }
       // Everything is available! Create a new order.
       Order result = new Order();
       result.setCustomerId(info.customerId());
